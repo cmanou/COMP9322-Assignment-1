@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" targetNamespace="http://sltf.unsw.edu.au/services" xmlns:ns="http://sltf.unsw.edu.au/services" xmlns:tns="http://sltf.unsw.edu.au/services">
+    <wsdl:documentation>Web service interface for COMP9322 assignment 1 (Currency Convert Data Content) </wsdl:documentation>
+    <wsdl:types>
+        <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://sltf.unsw.edu.au/services" xmlns:tns="http://sltf.unsw.edu.au/services">
+            <xs:element name="currencyConvertMarketData">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="eventSetId" nillable="false" type="xs:string"/>
+                        <xs:element name="targetCurrency" nillable="false" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="currencyConvertMarketDataResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="eventSetId" nillable="false" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:simpleType name="currencyConvertMarketDataFaultType">
+                <xs:restriction base="xs:string">
+                    <xs:enumeration value="InvalidEventSetId"/>
+                    <xs:enumeration value="InvalidTargetCurrency"/>
+                    <xs:enumeration value="InvalidMarketData"/>
+                    <xs:enumeration value="ProgramError"/>
+                </xs:restriction>
+            </xs:simpleType>
+            <xs:element name="currencyConvertMarketDataFault">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="faultType" nillable="false" type="tns:currencyConvertMarketDataFaultType"></xs:element>
+                        <xs:element name="faultMessage" nillable="false" type="xs:string"></xs:element>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:schema>
+    </wsdl:types>
+    <wsdl:message name="currencyConvertMarketDataRequest">
+        <wsdl:part name="parameters" element="ns:summaryMarketData"/>
+    </wsdl:message>
+    <wsdl:message name="currencyConvertMarketDataResponse">
+        <wsdl:part name="parameters" element="ns:currencyConvertMarketDataResponse"/>
+    </wsdl:message>
+    <wsdl:message name="currencyConvertMarketDataFault">
+        <wsdl:part name="parameters" element="ns:currencyConvertMarketDataFault"/>
+    </wsdl:message>
+    <wsdl:portType name="CurrencyConvertMarketDataServicePortType">
+        <wsdl:operation name="currencyConvertMarketData">
+            <wsdl:input message="ns:currencyConvertMarketDataRequest" wsaw:Action="urn:currencyConvertMarketData"/>
+            <wsdl:output message="ns:currencyConvertMarketDataResponse" wsaw:Action="urn:currencyConvertMarketDataResponse"/>
+            <wsdl:fault name="mainFault" message="ns:currencyConvertMarketDataFault"/>
+        </wsdl:operation>
+    </wsdl:portType>
+    <wsdl:binding name="CurrencyConvertMarketDataServiceSoap11Binding" type="ns:CurrencyConvertMarketDataServicePortType">
+        <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
+        <wsdl:operation name="currenyConvertMarketData">
+            <soap:operation soapAction="urn:currenyConvertMarketData" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="mainFault">
+                <soap:fault name="mainFault" use="literal"/>
+            </wsdl:fault>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="CurrencyConvertMarketDataService">
+        <wsdl:port name="CurrencyConvertMarketDataServiceHttpSoap11Endpoint" binding="ns:CurrencyConvertMarketDataServiceSoap11Binding">
+            <soap:address location="http://localhost:8080/axis2/services/CurrencyConvertMarketDataService"/>
+        </wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>
