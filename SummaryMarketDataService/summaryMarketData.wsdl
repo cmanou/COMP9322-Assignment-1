@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" targetNamespace="http://sltf.unsw.edu.au/services" xmlns:ns="http://sltf.unsw.edu.au/services" xmlns:tns="http://sltf.unsw.edu.au/services">
+    <wsdl:documentation>Web service interface for COMP9322 assignment 1 (Sort Market Data Content) </wsdl:documentation>
+    <wsdl:types>
+        <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://sltf.unsw.edu.au/services" xmlns:tns="http://sltf.unsw.edu.au/services">
+            <xs:element name="summaryMarketData">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="eventSetId" nillable="false" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="summaryMarketDataResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="eventSetId" nillable="false" type="xs:string"/>
+                        <xs:element name="sec" nillable="false" type="xs:string"/>
+                        <xs:element name="startDate" nillable="false" type="xs:dateTime"/>
+                        <xs:element name="endDate" nillable="false" type="xs:dateTime"/>
+                        <xs:element name="marketType" nillable="false" type="xs:string"/>
+                        <xs:element name="currencyCode" nillable="false" type="xs:string"/>
+                        <xs:element name="fileSize" nillable="false" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:simpleType name="summaryMarketDataFaultType">
+                <xs:restriction base="xs:string">
+                    <xs:enumeration value="InvalidEventSetId"/>
+                    <xs:enumeration value="ProgramError"/>
+                </xs:restriction>
+            </xs:simpleType>
+            <xs:element name="summaryMarketDataFault">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="faultType" nillable="false" type="tns:summaryMarketDataFaultType"></xs:element>
+                        <xs:element name="faultMessage" nillable="false" type="xs:string"></xs:element>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:schema>
+    </wsdl:types>
+    <wsdl:message name="summaryMarketDataRequest">
+        <wsdl:part name="parameters" element="ns:summaryMarketData"/>
+    </wsdl:message>
+    <wsdl:message name="summaryMarketDataResponse">
+        <wsdl:part name="parameters" element="ns:summaryMarketDataResponse"/>
+    </wsdl:message>
+    <wsdl:message name="summaryMarketDataFault">
+        <wsdl:part name="parameters" element="ns:summaryMarketDataFault"/>
+    </wsdl:message>
+    <wsdl:portType name="SummaryMarketDataServicePortType">
+        <wsdl:operation name="summaryMarketData">
+            <wsdl:input message="ns:summaryMarketDataRequest" wsaw:Action="urn:summaryMarketData"/>
+            <wsdl:output message="ns:summaryMarketDataResponse" wsaw:Action="urn:summaryMarketDataResponse"/>
+            <wsdl:fault name="mainFault" message="ns:summaryMarketDataFault"/>
+        </wsdl:operation>
+    </wsdl:portType>
+    <wsdl:binding name="SummaryMarketDataServiceSoap11Binding" type="ns:SummaryMarketDataServicePortType">
+        <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
+        <wsdl:operation name="summaryMarketData">
+            <soap:operation soapAction="urn:summaryMarketData" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="mainFault">
+                <soap:fault name="mainFault" use="literal"/>
+            </wsdl:fault>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="SummaryMarketDataService">
+        <wsdl:port name="SummaryMarketDataServiceHttpSoap11Endpoint" binding="ns:SummaryMarketDataServiceSoap11Binding">
+            <soap:address location="http://localhost:8080/axis2/services/SummaryMarketDataService"/>
+        </wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>
