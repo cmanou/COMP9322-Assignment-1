@@ -37,7 +37,7 @@
         </xs:schema>
     </wsdl:types>
     <wsdl:message name="currencyConvertMarketDataRequest">
-        <wsdl:part name="parameters" element="ns:summaryMarketData"/>
+        <wsdl:part name="parameters" element="ns:currencyConvertMarketData"/>
     </wsdl:message>
     <wsdl:message name="currencyConvertMarketDataResponse">
         <wsdl:part name="parameters" element="ns:currencyConvertMarketDataResponse"/>
@@ -54,8 +54,8 @@
     </wsdl:portType>
     <wsdl:binding name="CurrencyConvertMarketDataServiceSoap11Binding" type="ns:CurrencyConvertMarketDataServicePortType">
         <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
-        <wsdl:operation name="currenyConvertMarketData">
-            <soap:operation soapAction="urn:currenyConvertMarketData" style="document"/>
+        <wsdl:operation name="currencyConvertMarketData">
+            <soap:operation soapAction="urn:currencyConvertMarketData" style="document"/>
             <wsdl:input>
                 <soap:body use="literal"/>
             </wsdl:input>
