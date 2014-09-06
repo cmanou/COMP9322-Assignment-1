@@ -12,17 +12,25 @@ import au.edu.unsw.sltf.services.SummaryMarketDataResponseDocument;
 import au.edu.unsw.sltf.services.SummaryMarketDataDocument;
 import au.edu.unsw.sltf.services.SummaryMarketDataResponseDocument.SummaryMarketDataResponse;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import org.apache.axis2.databinding.types.URI;
-import org.apache.axis2.databinding.types.URI.MalformedURIException;
+
 
 /**
  *  SummaryMarketDataServiceSkeleton java skeleton for the axisService
  */
 public class SummaryMarketDataServiceSkeleton implements SummaryMarketDataServiceSkeletonInterface{
 
+    private final SimpleDateFormat myFormat = new SimpleDateFormat("dd-MMM-yyyy'T'HH:mm:ss.SSS");
 
 	/**
 	 * Auto generated method signature
@@ -32,36 +40,70 @@ public class SummaryMarketDataServiceSkeleton implements SummaryMarketDataServic
 	 * @throws SummaryMarketDataFaultException 
 	 */
 
+	//TODO:  Validation
 	public SummaryMarketDataResponseDocument summaryMarketData (SummaryMarketDataDocument reqDoc) throws SummaryMarketDataFaultException{
 		SummaryMarketData req = reqDoc.getSummaryMarketData();
         
 		String eventSetId = req.getEventSetId();
 		
-		//TODO: Make a request to download service
+		//TODO: Make a request to download service to get this url
+		URL dataSourceURL = null;
 		try {
-			URI dataSourceURL = new URI();
-			dataSourceURL.setScheme("http");
-			dataSourceURL.setHost("www.cse.unsw.edu.au");
-			dataSourceURL.setPath("/~hpaik/9322/assignments/common/files_csv_spec/MarketData02.csv");
-			
-			
-		} catch (MalformedURIException e) {
-			// TODO Auto-generated catch block
+			dataSourceURL = new URL("http://www.cse.unsw.edu.au/~hpaik/9322/assignments/common/files_csv_spec/MarketData02.csv");
+		} catch (MalformedURLException e) {
 			e.printStackTrace();
-		}
-
-		//TODO:  Validation
+		}		
 		
-		//TODO: Get the file from DownloadService
-		
-		
-		//TODO: Process file and get values
-		String sec = "sec Code";
+		//Process file and get values
+		String sec = "";
         Calendar startDate = Calendar.getInstance();
         Calendar endDate = Calendar.getInstance();
-		String market = "Both";
-		String currency = "AUD";
-		String size = "1MB";
+		String market = "";
+		String currency = "";
+		String size = humanReadableByteCount(getFileSize(dataSourceURL), true);
+		
+		try {
+
+			BufferedReader in = new BufferedReader(new InputStreamReader(dataSourceURL.openStream()));
+			// Skip first 'heading' line, then filter other lines.
+	        String inputLine = in.readLine();
+	        boolean first = true;
+	        while ((inputLine = in.readLine()) != null)
+	        {
+	            String[] lineParts = inputLine.split(",");
+	            Calendar tempCalendar = Calendar.getInstance();
+	            tempCalendar.setTime(this.myFormat.parse(lineParts[1]+"T"+lineParts[2]));
+
+	        	if (first) {
+		            sec = lineParts[0];
+		            market = lineParts[4];
+		            currency = getCurrency(lineParts[5]);
+		            startDate  = tempCalendar; 
+		            endDate = tempCalendar;
+	        		first = false;
+	        	}
+	        	
+	        	if(market != lineParts[4]) {
+	        		market = "Mixed";
+	        	}
+	        	
+	        	if (tempCalendar.getTimeInMillis() < startDate.getTimeInMillis()) {
+	        		startDate = tempCalendar;
+	        	}
+	        	
+	        	if (tempCalendar.getTimeInMillis() > endDate.getTimeInMillis()) {
+	        		endDate = tempCalendar;
+	        	}
+	           
+	        }
+	        
+	        
+	        in.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+       
+        
 		
 		//Create Response Object
 		SummaryMarketDataResponseDocument resDoc = SummaryMarketDataResponseDocument.Factory.newInstance();
@@ -77,6 +119,38 @@ public class SummaryMarketDataServiceSkeleton implements SummaryMarketDataServic
 
         return resDoc;		
 		
+	}
+	
+	private String getCurrency(String price) {
+		String code = "AUD";
+		
+		Pattern pattern = Pattern.compile("([a-zA-z]*)([0-9.]*)");
+		Matcher matcher = pattern.matcher(price);
+		matcher.find();
+		if (matcher.find() && matcher.group(1) != "") {
+			code = matcher.group(1);
+		}
+		
+		return code;
+	}
+	
+	private int getFileSize(URL url) {
+		URLConnection conn;
+		try {
+			conn = url.openConnection();
+		    return conn.getContentLength();
+		} catch (IOException e) {
+			e.printStackTrace();
+			return 0;
+		}
+	}
+	
+	private static String humanReadableByteCount(long bytes, boolean si) {
+	    int unit = si ? 1000 : 1024;
+	    if (bytes < unit) return bytes + " B";
+	    int exp = (int) (Math.log(bytes) / Math.log(unit));
+	    String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp-1) + (si ? "" : "i");
+	    return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
 	}
 
 }
