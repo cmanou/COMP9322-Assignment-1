@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- This file was auto-generated from WSDL -->
+<!-- by the Apache Axis2 version: 1.6.2  Built on : Apr 17, 2012 (05:33:49 IST) -->
+<serviceGroup>
+    <service name="SummaryMarketDataService">
+        <messageReceivers>
+            <messageReceiver mep="http://www.w3.org/ns/wsdl/in-out" class="au.edu.unsw.sltf.services.SummaryMarketDataServiceMessageReceiverInOut"/>
+        </messageReceivers>
+        <parameter name="ServiceClass">au.edu.unsw.sltf.services.SummaryMarketDataServiceSkeleton</parameter>
+        <parameter name="useOriginalwsdl">true</parameter>
+        <parameter name="modifyUserWSDLPortAddress">true</parameter>
+        <operation name="summaryMarketData" mep="http://www.w3.org/ns/wsdl/in-out" namespace="http://sltf.unsw.edu.au/services">
+            <actionMapping>urn:summaryMarketData</actionMapping>
+            <outputActionMapping>urn:summaryMarketDataResponse</outputActionMapping>
+            <faultActionMapping faultName="mainFault">http://sltf.unsw.edu.au/services/SummaryMarketDataServicePortType/summaryMarketData/Fault/mainFault</faultActionMapping>
+            <faultActionMapping faultName="SummaryMarketDataFault">http://sltf.unsw.edu.au/services/SummaryMarketDataServicePortType/summaryMarketData/Fault/mainFault</faultActionMapping>
+            <faultActionMapping faultName="SummaryMarketDataFault_Exception">http://sltf.unsw.edu.au/services/SummaryMarketDataServicePortType/summaryMarketData/Fault/mainFault</faultActionMapping>
+            <faultActionMapping faultName="summaryMarketDataFault">urn:summaryMarketDatasummaryMarketDataFault</faultActionMapping>
+        </operation>
+    </service>
+</serviceGroup>
