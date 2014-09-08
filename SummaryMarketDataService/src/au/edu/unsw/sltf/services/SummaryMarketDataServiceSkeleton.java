@@ -59,7 +59,7 @@ public class SummaryMarketDataServiceSkeleton implements SummaryMarketDataServic
         Calendar startDate = Calendar.getInstance();
         Calendar endDate = Calendar.getInstance();
 		String market = "";
-		String currency = "";
+		String currency = "Not Found";
 		String size = humanReadableByteCount(getFileSize(dataSourceURL), true);
 		
 		try {
@@ -77,10 +77,13 @@ public class SummaryMarketDataServiceSkeleton implements SummaryMarketDataServic
 	        	if (first) {
 		            sec = lineParts[0];
 		            market = lineParts[4];
-		            currency = getCurrency(lineParts[5]);
 		            startDate  = tempCalendar; 
 		            endDate = tempCalendar;
 	        		first = false;
+	        	}
+	        	
+	        	if(!lineParts[5].isEmpty() && currency.equals("Not Found")) {
+		            currency = getCurrency(lineParts[5]);
 	        	}
 	        	
 	        	if(market != lineParts[4]) {
