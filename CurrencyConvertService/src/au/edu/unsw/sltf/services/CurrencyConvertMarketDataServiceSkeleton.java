@@ -18,6 +18,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,6 +29,7 @@ import au.edu.unsw.sltf.services.CurrencyConvertMarketDataResponseDocument.Curre
  *  CurrencyConvertMarketDataServiceSkeleton java skeleton for the axisService
  */
 public class CurrencyConvertMarketDataServiceSkeleton implements CurrencyConvertMarketDataServiceSkeletonInterface{
+	static Logger logger = Logger.getLogger(CurrencyConvertMarketDataServiceSkeleton.class.getName());
 
 	static final Map<String, Double> conversions = new HashMap<String, Double>() {
 		{
@@ -245,7 +247,17 @@ public class CurrencyConvertMarketDataServiceSkeleton implements CurrencyConvert
 			{
 				// Extract relevant line variables.
 				String[] lineParts = inputLine.split(",");
-				lineParts[5] = convertPrice(currency,lineParts[5]);
+				
+				Pattern pattern = Pattern.compile("([a-zA-z]*)([0-9.]*)");
+				String price = lineParts[5];
+				if (!price.isEmpty()) {
+					Matcher matcher = pattern.matcher(price);
+					matcher.find();
+					double priceV = Double.parseDouble(matcher.group(2));
+					lineParts[5] = currency + String.format("%.2f", (priceV * conversions.get(currency)));
+				}
+				//TODO: Error check on group 0
+				
 				filteredEntries.add(join(lineParts, ",",0,lineParts.length));
 
 			}
@@ -328,16 +340,5 @@ public class CurrencyConvertMarketDataServiceSkeleton implements CurrencyConvert
 		return buf.toString();
 	}
 
-	private String convertPrice(String currency, String price) {
-
-		Pattern pattern = Pattern.compile("([a-zA-z]*)([0-9.]*)");
-		Matcher matcher = pattern.matcher(price);
-		matcher.find();
-		if (matcher.find() && matcher.group(1) == "") {
-			price = currency + (Double.parseDouble(matcher.group(2))*conversions.get(currency));
-		}
-
-		return price;
-	}
 
 }
