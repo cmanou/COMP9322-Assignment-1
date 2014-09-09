@@ -15,7 +15,10 @@ import au.edu.unsw.sltf.services.SummaryMarketDataResponseDocument.SummaryMarket
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.regex.Matcher;
@@ -31,8 +34,6 @@ public class SummaryMarketDataServiceSkeleton implements SummaryMarketDataServic
     private final SimpleDateFormat myFormat = new SimpleDateFormat("dd-MMM-yyyy'T'HH:mm:ss.SSS");
     private final String MY_CORE_PATH = System.getProperty("java.io.tmpdir")+"/cjze477_ass1";
     private final String PRIVATE_PATH = "/private";
-    private final String WEB_ROOT = System.getenv("CATALINA_HOME")+"/webapps/ROOT";
-    private final String PUBLIC_PATH = "/cjze477_ass1/public";
     private final String SUFFIX = ".csv";
     
 	/**
@@ -43,7 +44,6 @@ public class SummaryMarketDataServiceSkeleton implements SummaryMarketDataServic
 	 * @throws SummaryMarketDataFaultException 
 	 */
 
-	//TODO:  Validation
 	public SummaryMarketDataResponseDocument summaryMarketData (SummaryMarketDataDocument reqDoc) throws SummaryMarketDataFaultException{
 		SummaryMarketData req = reqDoc.getSummaryMarketData();
         
@@ -129,9 +129,40 @@ public class SummaryMarketDataServiceSkeleton implements SummaryMarketDataServic
 	        
 	        
 	        in.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		} catch (FileNotFoundException e) {
+            // File not found.
+        	SummaryMarketDataFaultDocument myFaultDoc = SummaryMarketDataFaultDocument.Factory.newInstance();
+    		SummaryMarketDataFault myFault = myFaultDoc.addNewSummaryMarketDataFault();
+    		
+            myFault.setFaultType(SummaryMarketDataFaultType.INVALID_EVENT_SET_ID);
+            myFault.setFaultMessage("Event File does not exist!");
+            
+            SummaryMarketDataFaultException myException = new SummaryMarketDataFaultException();
+            myException.setFaultMessage(myFaultDoc);
+            throw myException;
+        } catch (IOException e) {
+            // Failed to read in file
+        	SummaryMarketDataFaultDocument myFaultDoc = SummaryMarketDataFaultDocument.Factory.newInstance();
+    		SummaryMarketDataFault myFault = myFaultDoc.addNewSummaryMarketDataFault();
+    		
+            myFault.setFaultType(SummaryMarketDataFaultType.PROGRAM_ERROR);
+            myFault.setFaultMessage("Invalid Line in Event File!");
+            
+            SummaryMarketDataFaultException myException = new SummaryMarketDataFaultException();
+            myException.setFaultMessage(myFaultDoc);
+            throw myException;
+		} catch (ParseException e) {
+            // Bad Date in File
+        	SummaryMarketDataFaultDocument myFaultDoc = SummaryMarketDataFaultDocument.Factory.newInstance();
+    		SummaryMarketDataFault myFault = myFaultDoc.addNewSummaryMarketDataFault();
+    		
+            myFault.setFaultType(SummaryMarketDataFaultType.PROGRAM_ERROR);
+            myFault.setFaultMessage("Invalid Date in Event File!");
+            
+            SummaryMarketDataFaultException myException = new SummaryMarketDataFaultException();
+            myException.setFaultMessage(myFaultDoc);
+            throw myException;
+		} 
        
         
 		
@@ -165,14 +196,10 @@ public class SummaryMarketDataServiceSkeleton implements SummaryMarketDataServic
 	}
 	
 	private long getFileSize(File file) {
-		try {
-			return file.length();
-		} catch (Exception e) {
-			e.printStackTrace();
-			return 0;
-		}
+		return file.length();
 	}
 	
+	//Taken from stackoverflow
 	private static String humanReadableByteCount(long bytes, boolean si) {
 	    int unit = si ? 1000 : 1024;
 	    if (bytes < unit) return bytes + " B";
