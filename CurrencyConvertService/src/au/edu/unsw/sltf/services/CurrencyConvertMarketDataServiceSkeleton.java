@@ -9,10 +9,8 @@ package au.edu.unsw.sltf.services;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.InputStreamReader;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -23,6 +21,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import au.edu.unsw.sltf.services.CurrencyConvertMarketDataDocument.CurrencyConvertMarketData;
+import au.edu.unsw.sltf.services.CurrencyConvertMarketDataFaultDocument.CurrencyConvertMarketDataFault;
 import au.edu.unsw.sltf.services.CurrencyConvertMarketDataResponseDocument.CurrencyConvertMarketDataResponse;
 
 /**
@@ -32,6 +31,8 @@ public class CurrencyConvertMarketDataServiceSkeleton implements CurrencyConvert
 	static Logger logger = Logger.getLogger(CurrencyConvertMarketDataServiceSkeleton.class.getName());
 
 	static final Map<String, Double> conversions = new HashMap<String, Double>() {
+		private static final long serialVersionUID = 4559885767009151828L;
+
 		{
 			put("USD",0.9307674541);
 			put("EUR",0.7006667524);
@@ -207,8 +208,6 @@ public class CurrencyConvertMarketDataServiceSkeleton implements CurrencyConvert
 
 	private final String MY_CORE_PATH = System.getProperty("java.io.tmpdir")+"/cjze477_ass1";
 	private final String PRIVATE_PATH = "/private";
-	private final String WEB_ROOT = System.getenv("CATALINA_HOME")+"/webapps/ROOT";
-	private final String PUBLIC_PATH = "/cjze477_ass1/public";
 	private final String SUFFIX = ".csv";
 
 	/**
@@ -219,26 +218,60 @@ public class CurrencyConvertMarketDataServiceSkeleton implements CurrencyConvert
 	 * @throws CurrencyConvertMarketDataFaultException 
 	 */
 
-	//TODO: Validation
 	public CurrencyConvertMarketDataResponseDocument currencyConvertMarketData ( CurrencyConvertMarketDataDocument reqDoc) throws CurrencyConvertMarketDataFaultException {
 		CurrencyConvertMarketData req = reqDoc.getCurrencyConvertMarketData();
 
 		String eventSetId = req.getEventSetId();
 		String currency = req.getTargetCurrency();
-		//TODO: more validation;
 		
-		//TODO: Make a request to download service to get this url
-		URL dataSourceURL = null;
-		try {
-			dataSourceURL = new URL("http://www.cse.unsw.edu.au/~hpaik/9322/assignments/common/files_csv_spec/MarketData02.csv");
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		}		
-
+		 // Check that the id is of a valid format.
+        if(!eventSetId.matches("^9322-[0-9]+$"))
+        {    		
+            // Invalid Event Id.
+        	CurrencyConvertMarketDataFaultDocument myFaultDoc = CurrencyConvertMarketDataFaultDocument.Factory.newInstance();
+        	CurrencyConvertMarketDataFault myFault = myFaultDoc.addNewCurrencyConvertMarketDataFault();
+    		
+            myFault.setFaultType(CurrencyConvertMarketDataFaultType.INVALID_EVENT_SET_ID);
+            myFault.setFaultMessage("Invalid Event Id Format!");
+            
+            CurrencyConvertMarketDataFaultException myException = new CurrencyConvertMarketDataFaultException();
+            myException.setFaultMessage(myFaultDoc);
+            throw myException;
+        }
+        
+        // Check that event id can be found.
+        File myFile = new File(this.MY_CORE_PATH+this.PRIVATE_PATH+"/"+eventSetId+this.SUFFIX);
+        if(!myFile.exists())
+        {
+            // File not found.
+        	CurrencyConvertMarketDataFaultDocument myFaultDoc = CurrencyConvertMarketDataFaultDocument.Factory.newInstance();
+        	CurrencyConvertMarketDataFault myFault = myFaultDoc.addNewCurrencyConvertMarketDataFault();
+    		
+            myFault.setFaultType(CurrencyConvertMarketDataFaultType.INVALID_EVENT_SET_ID);
+            myFault.setFaultMessage("Event File does not exist!");
+            
+            CurrencyConvertMarketDataFaultException myException = new CurrencyConvertMarketDataFaultException();
+            myException.setFaultMessage(myFaultDoc);
+            throw myException;
+        }
+        
+        if(!conversions.containsKey(currency)) {
+            //Currency Not Found
+        	CurrencyConvertMarketDataFaultDocument myFaultDoc = CurrencyConvertMarketDataFaultDocument.Factory.newInstance();
+        	CurrencyConvertMarketDataFault myFault = myFaultDoc.addNewCurrencyConvertMarketDataFault();
+    		
+            myFault.setFaultType(CurrencyConvertMarketDataFaultType.INVALID_TARGET_CURRENCY);
+            myFault.setFaultMessage("Invalid Currency/Not In Conversion");
+            
+            CurrencyConvertMarketDataFaultException myException = new CurrencyConvertMarketDataFaultException();
+            myException.setFaultMessage(myFaultDoc);
+            throw myException;
+        }
+		
 		//Process file and get values
 		try {
 
-			BufferedReader in = new BufferedReader(new InputStreamReader(dataSourceURL.openStream()));
+			BufferedReader in = new BufferedReader(new FileReader(myFile));
 
 			ArrayList<String> filteredEntries = new ArrayList<String>();
 			String inputLine = in.readLine();
@@ -253,10 +286,23 @@ public class CurrencyConvertMarketDataServiceSkeleton implements CurrencyConvert
 				if (!price.isEmpty()) {
 					Matcher matcher = pattern.matcher(price);
 					matcher.find();
+					if(!matcher.group(1).isEmpty()) {
+						in.close();
+			        	CurrencyConvertMarketDataFaultDocument myFaultDoc = CurrencyConvertMarketDataFaultDocument.Factory.newInstance();
+			        	CurrencyConvertMarketDataFault myFault = myFaultDoc.addNewCurrencyConvertMarketDataFault();
+			    		
+			            myFault.setFaultType(CurrencyConvertMarketDataFaultType.INVALID_MARKET_DATA);
+			            myFault.setFaultMessage("Market File has already been converted");
+			            
+			            CurrencyConvertMarketDataFaultException myException = new CurrencyConvertMarketDataFaultException();
+			            myException.setFaultMessage(myFaultDoc);
+			            throw myException;
+					}
 					double priceV = Double.parseDouble(matcher.group(2));
 					lineParts[5] = currency + String.format("%.2f", (priceV * conversions.get(currency)));
+					
+					
 				}
-				//TODO: Error check on group 0
 				
 				filteredEntries.add(join(lineParts, ",",0,lineParts.length));
 
@@ -270,7 +316,16 @@ public class CurrencyConvertMarketDataServiceSkeleton implements CurrencyConvert
 			if(!privateFolder.exists())
 			{
 				if(!privateFolder.mkdirs()){
-					//ERROR
+		            // File not found.
+		        	CurrencyConvertMarketDataFaultDocument myFaultDoc = CurrencyConvertMarketDataFaultDocument.Factory.newInstance();
+		        	CurrencyConvertMarketDataFault myFault = myFaultDoc.addNewCurrencyConvertMarketDataFault();
+		    		
+		            myFault.setFaultType(CurrencyConvertMarketDataFaultType.PROGRAM_ERROR);
+		            myFault.setFaultMessage("Can Not Create New File!");
+		            
+		            CurrencyConvertMarketDataFaultException myException = new CurrencyConvertMarketDataFaultException();
+		            myException.setFaultMessage(myFaultDoc);
+		            throw myException;
 				}
 			}
 
@@ -310,15 +365,15 @@ public class CurrencyConvertMarketDataServiceSkeleton implements CurrencyConvert
 
 
 		} catch (Exception e) {
-			//TODO Error
-
-			CurrencyConvertMarketDataResponseDocument resDoc = CurrencyConvertMarketDataResponseDocument.Factory.newInstance();
-			CurrencyConvertMarketDataResponse res = resDoc.addNewCurrencyConvertMarketDataResponse();
-
-			res.setEventSetId("FAILED");
-
-
-			return resDoc;	
+        	CurrencyConvertMarketDataFaultDocument myFaultDoc = CurrencyConvertMarketDataFaultDocument.Factory.newInstance();
+        	CurrencyConvertMarketDataFault myFault = myFaultDoc.addNewCurrencyConvertMarketDataFault();
+    		
+            myFault.setFaultType(CurrencyConvertMarketDataFaultType.PROGRAM_ERROR);
+            myFault.setFaultMessage("Error Parsing Market Data");
+            
+            CurrencyConvertMarketDataFaultException myException = new CurrencyConvertMarketDataFaultException();
+            myException.setFaultMessage(myFaultDoc);
+            throw myException;
 		}
 
 	}
