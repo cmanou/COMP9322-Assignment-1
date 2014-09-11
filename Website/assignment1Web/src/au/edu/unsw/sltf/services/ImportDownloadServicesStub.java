@@ -115,6 +115,9 @@
                 targetEndpoint));
         _serviceClient.getOptions().setUseSeparateListener(useSeparateListener);
         
+            //Set the soap version
+            _serviceClient.getOptions().setSoapVersionURI(org.apache.axiom.soap.SOAP12Constants.SOAP_ENVELOPE_NAMESPACE_URI);
+        
     
     }
 
@@ -123,7 +126,7 @@
      */
     public ImportDownloadServicesStub(org.apache.axis2.context.ConfigurationContext configurationContext) throws org.apache.axis2.AxisFault {
         
-                    this(configurationContext,"http://localhost:8080/axis2/services/ImportDownloadServices" );
+                    this(configurationContext,"http://localhost:50000/axis2/services/ImportDownloadServices.ImportDownloadServicesHttpSoap12Endpoint/" );
                 
     }
 
@@ -132,7 +135,7 @@
      */
     public ImportDownloadServicesStub() throws org.apache.axis2.AxisFault {
         
-                    this("http://localhost:8080/axis2/services/ImportDownloadServices" );
+                    this("http://localhost:50000/axis2/services/ImportDownloadServices.ImportDownloadServicesHttpSoap12Endpoint/" );
                 
     }
 
@@ -737,7 +740,7 @@
         }
         return false;
     }
-     //http://localhost:8080/axis2/services/ImportDownloadServices
+     //http://localhost:50000/axis2/services/ImportDownloadServices.ImportDownloadServicesHttpSoap12Endpoint/
             private  org.apache.axiom.om.OMElement  toOM(au.edu.unsw.sltf.services.ImportMarketData param, boolean optimizeContent)
             throws org.apache.axis2.AxisFault {
 

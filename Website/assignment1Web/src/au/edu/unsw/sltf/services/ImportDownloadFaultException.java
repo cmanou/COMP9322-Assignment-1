@@ -10,7 +10,7 @@ package au.edu.unsw.sltf.services;
 
 public class ImportDownloadFaultException extends java.lang.Exception{
 
-    private static final long serialVersionUID = 1410073962139L;
+    private static final long serialVersionUID = 1410357307387L;
     
     private au.edu.unsw.sltf.services.ImportDownloadFault faultMessage;
 

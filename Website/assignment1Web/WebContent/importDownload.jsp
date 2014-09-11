@@ -5,7 +5,7 @@
 <html>
 
 <head>
-  <title>COMP9322 Web Sevices</title>
+  <title>COMP9322 Web Services</title>
   <meta name="description" content="website description" />
   <meta name="keywords" content="website keywords, website keywords" />
   <meta http-equiv="content-type" content="text/html; charset=windows-1252" />
@@ -33,6 +33,13 @@
       </div>
     </div>
     <div id="site_content">
+      
+      <c:if test= "${not empty importResponse}">
+           <p style="color:orange;"><b>Scroll down to see the <span style="color:green;">'Import'</span> service response!</b></p>
+      </c:if>
+      <c:if test= "${not empty downloadResponse}">
+           <p style="color:orange;"><b>Scroll down to see the <span style="color:green;">'Download'</span> service response!</b></p>
+      </c:if>
       
       <div id="content">
         <!-- insert the page content here -->
@@ -66,7 +73,7 @@
            		<th>Type</th>
            		<th>Description</th>
            		<th>Default</th>
-           		<th>Example/Sample</th>
+           		<th width="110px" >Example/Sample</th>
            	</tr>
            	<tr>
            		<td>sec*</td>
@@ -95,11 +102,12 @@
 				<td> </td>
 				<td>2007-01-25T08:30:00.200</td>
 			</tr>
+			<tr>
 				<td>dataSourceURL*</td>
 				<td>String</td>
 				<td>This is a URL that points to the input Market Data file.<br />- Normal URL format.</td>
         		<td> </td>
-        		<td>http://www.cse.unsw.edu.au/~hpa<br />ik/9322/assignments/common/files_c<br />sv_spec/MarketData02.csv</td>
+        		<td>http://www.cse.unsw.edu.au/~hpaik/9322/assignments/common/files_csv_spec/MarketData02.csv</td>
         	</tr>
         </table>
 		
@@ -158,9 +166,9 @@
 			</tr>
 			<tr>
            		<td>ProgramError</td>
-           		<td>Error in creating or writing to file!</td>
+           		<td>Error in reading input file OR creating/writing result file!</td>
            		<td>Service could not create or write to interal file.</td>
-           		<td>Nothing you can do. Admin would have been notified, please try again later.</td>
+           		<td>Check correctness of dataSourceURL, If Correct, Nothing you can do. Admin would have been notified, please try again later.</td>
 			</tr>
 			<tr>
            		<td>ProgramError</td>
@@ -188,7 +196,7 @@
         	<table>
         		<tr>
         			<th colspan="2" >Parameters</th>
-        			<th id="responseField" >Response</th>
+        			<th id="responseFieldImport" >Response</th>
         		</tr>
         		<tr>
         			<td>sec</td>
@@ -218,22 +226,133 @@
         		</tr>
         	</table>
         </form>
-        
-        <h5>WSDL</h5>
-        <p><a href="ImportDownloadServices.wsdl" >Download WSDL</a></p>
                 
 		<hr />
 		<br />
 		<br />
 		
+		<!-- ////////////////////////////////////////////////////////////////////////////////////////////// -->
+		
 		<h4>Download File operation</h4>
 		
 		<p>
-			The downloadFile operation makes Market Data files that are outputs of importMarketData
+			The downloadFile operation makes Market Data files that are outputs of 'importMarketData' operation
 			 accessible to users over the internet via URL download.
 		</p>
-       
-      </div>
+		
+		<h5>Parameters</h5>
+		<p>All parameters marked with a '*' must be specified.</p>
+        <table>
+        	<tr>
+           		<th>Name</th>
+           		<th>Type</th>
+           		<th>Description</th>
+           		<th>Default</th>
+           		<th width="110px" >Example/Sample</th>
+           	</tr>
+           	<tr>
+           		<td>eventSetId*</td>
+           		<td>String</td>
+           		<td>An opaque "handle" or reference that is the output of the 'importMarketData' operation.<br />
+           			- Of the pattern "^9322-[0-9]+$".
+           		</td>
+				<td> </td>
+				<td>9322-201481195811595</td>
+			</tr>
+        </table>
+		
+		<h5>Return Value/s</h5>
+
+        <table>
+        	<tr>
+           		<th>Name</th>
+           		<th>Type</th>
+           		<th>Description</th>
+           		<th>Default</th>
+           		<th>Example/s</th>
+           	</tr>
+           	<tr>
+           		<td>dataURL</td>
+           		<td>String</td>
+           		<td>This is a http:// URL that points to the Market Data file referenced by the 'eventSetId' input parameter. A user can download the Market Data file contents using this URL (e.g. by navigating to this URL using a Web browser).</td>
+				<td> </td>
+				<td>http://localhost:50000/cjze477_ass1/public/9322-2014811104337431.csv</td>
+			</tr>
+			
+        </table>
+        
+		<h5>Fault Responses</h5>
+
+        <table>
+        	<tr>
+           		<th>Fault Type</th>
+           		<th>Fault Message</th>
+           		<th>Cause</th>
+           		<th>Resolution</th>
+           	</tr>
+           	<tr>
+           		<td>ProgramError</td>
+           		<td>Invalid Event Id Format!</td>
+           		<td>Event handle does not match the pattern '^9322-[0-9]+$'</td>
+           		<td>Check handle format and try again.</td>
+			</tr>
+			<tr>
+           		<td>ProgramError</td>
+           		<td>Event File does not exist!</td>
+           		<td>Service could not find the file that belongs to this handle.</td>
+           		<td>Make sure you use the 'Import' operation before 'download'.</td>
+			</tr>
+			<tr>
+           		<td>ProgramError</td>
+           		<td>Private folder structure not created!</td>
+           		<td>Service could not create interal file structure for request.</td>
+           		<td>Nothing you can do. Admin would have been notified, please try again later.</td>
+			</tr>
+			<tr>
+           		<td>ProgramError</td>
+           		<td>Copy file error!</td>
+           		<td>Service could not fully create a public version of the file.</td>
+           		<td>Nothing you can do. Admin would have been notified, please try again later.</td>
+			</tr>
+			<tr>
+           		<td>ProgramError</td>
+           		<td>Bad output URI!</td>
+           		<td>Service could not construct a valid URI to give to the client.</td>
+           		<td>Nothing you can do. Admin would have been notified, please try again later.</td>
+			</tr>
+        </table>
+        
+        <h5>Try-it!</h5>
+        
+        <form method="post" action="Controller">
+        	<table>
+        		<tr>
+        			<th colspan="2" >Parameters</th>
+        			<th id="responseFieldDownload" >Response</th>
+        		</tr>
+        		<tr>
+        			<td>eventSetId</td>
+        			<td><input type="text" name="aEventSetId" /></td>
+        			<td rowspan="5">
+        				${downloadResponse}
+        			 </td>
+        		</tr>
+        		<tr>
+        			<td></td>
+        			<td>
+        				<input type="hidden" name="action" value="requestDownload" />
+        				<input type="submit" value="Go!"/>
+        			</td>
+        		</tr>
+        	</table>
+        </form>
+       	
+       	<hr />
+       	<br />
+       	<h4>Download Service WSDL</h4>
+        <p><a href="ImportDownloadServices.wsdl" >Download WSDL</a></p>
+        
+      </div> <!--  Content Div End -->
       
     </div>
     <div id="footer">

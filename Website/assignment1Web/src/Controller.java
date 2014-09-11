@@ -1,5 +1,6 @@
 
 
+
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -15,8 +16,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.axis2.databinding.types.URI;
 
-import com.sun.tools.ws.wsdl.document.Import;
-
+import au.edu.unsw.sltf.services.DownloadFile;
+import au.edu.unsw.sltf.services.DownloadFileResponse;
 import au.edu.unsw.sltf.services.ImportDownloadFaultException;
 import au.edu.unsw.sltf.services.ImportDownloadServicesStub;
 import au.edu.unsw.sltf.services.ImportMarketData;
@@ -50,24 +51,24 @@ public class Controller extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		
 	    String action = request.getParameter("action");
-	    String nextPage = "importDownload.jsp";
+	    String nextPage = "importDownload.jsp";  
 	    
 	    if(action.equals("requestImport"))
-	    {
+	    {  
 	        String sec = request.getParameter("aSec");
 	        String starDate = request.getParameter("aStartDate");
 	        String endDate = request.getParameter("aEndDate");
 	        String dataSourceURI = request.getParameter("aDataSourceURI");
 	        
 	        try {
-    	        // Generate request.
-    	        ImportDownloadServicesStub myStub = new ImportDownloadServicesStub();
-    	        
-    	        ImportMarketData myIMDO = new ImportMarketData();
-    	        
-    	        myIMDO.setSec(sec);
-    	        
-    	        SimpleDateFormat myFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+                // Generate request.
+                ImportDownloadServicesStub myStub = new ImportDownloadServicesStub();
+                
+                ImportMarketData myIMDO = new ImportMarketData();
+                
+                myIMDO.setSec(sec);
+                
+                SimpleDateFormat myFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
                 Date d1 = myFormat.parse(starDate);
                 Calendar c1 = Calendar.getInstance();
                 c1.setTime(d1);
@@ -81,36 +82,69 @@ public class Controller extends HttpServlet {
                 URI myURI = new URI(dataSourceURI);
                 myIMDO.setDataSourceURL(myURI);
     
-    	        ImportMarketDataResponse resp = myStub.importMarketData(myIMDO);
-    	        
-    	        String eventHandle = resp.getEventSetId();
-    	        
-    	        request.setAttribute("importResponse", eventHandle);
-    	        
-    	        nextPage = "importDownload.jsp#responseField";
-	        }
-	        catch (ParseException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                ImportMarketDataResponse resp = myStub.importMarketData(myIMDO);
+                
+                String eventHandle = resp.getEventSetId();
+                
+                request.setAttribute("importResponse", eventHandle);
+                
+                nextPage = "importDownload.jsp";
+            
+            
             } catch (ImportDownloadFaultException e) {
                 
                 String faultMsg = e.getFaultMessage().getFaultMessage();
                 String faultType = e.getFaultMessage().getFaultType().getValue();
-                String totalResponse = faultType+"-"+faultMsg;
+                String totalResponse = faultType+" - "+faultMsg;
                 
                 request.setAttribute("importResponse", totalResponse);
                 
-                nextPage = "importDownload.jsp#responseField";
+                nextPage = "importDownload.jsp";
                 
-                // Dispatch Control.
-                RequestDispatcher myRequestDispatcher = request.getRequestDispatcher("/"+nextPage);
-                myRequestDispatcher.forward(request, response);
+            } catch (ParseException e) {
+                
+                String message = "ProgramError - Invalid date format!";
+                
+                request.setAttribute("importResponse", message);
+                
+                nextPage = "importDownload.jsp";
+                
+            }
+	    } else if (action.equals("requestDownload")) {
+	        
+	        String eventSetId = request.getParameter("aEventSetId");
+	        
+	        try {
+    	        // Generate request.
+                ImportDownloadServicesStub myStub = new ImportDownloadServicesStub();
+    	        
+                DownloadFile myDF = new DownloadFile();
+                myDF.setEventSetId(eventSetId);
+            
+                DownloadFileResponse resp = myStub.downloadFile(myDF);
+                
+                String resultURL = resp.getDataURL().toString();
+                
+                request.setAttribute("downloadResponse", resultURL);
+                
+                nextPage = "importDownload.jsp";
+                
+            } catch (ImportDownloadFaultException e) {
+                
+                String faultMsg = e.getFaultMessage().getFaultMessage();
+                String faultType = e.getFaultMessage().getFaultType().getValue();
+                String totalResponse = faultType+" - "+faultMsg;
+                
+                request.setAttribute("downloadResponse", totalResponse);
+                
+                nextPage = "importDownload.jsp";
             }
 	    }
 	    
 	    // Dispatch Control.
         RequestDispatcher myRequestDispatcher = request.getRequestDispatcher("/"+nextPage);
         myRequestDispatcher.forward(request, response);
+
 	}
 
 }
