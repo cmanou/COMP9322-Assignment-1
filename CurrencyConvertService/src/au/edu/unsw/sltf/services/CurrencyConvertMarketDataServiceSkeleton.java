@@ -303,45 +303,50 @@ public class CurrencyConvertMarketDataServiceSkeleton implements CurrencyConvert
 					
 					
 				}
+//				logger.warning("WTF" + lineParts.length);
 				
-				String bidPrice = lineParts[7];
-				if (!bidPrice.isEmpty()) {
-					Matcher matcher = pattern.matcher(bidPrice);
-					matcher.find();
-					if(!matcher.group(1).isEmpty()) {
-						in.close();
-			        	CurrencyConvertMarketDataFaultDocument myFaultDoc = CurrencyConvertMarketDataFaultDocument.Factory.newInstance();
-			        	CurrencyConvertMarketDataFault myFault = myFaultDoc.addNewCurrencyConvertMarketDataFault();
-			    		
-			            myFault.setFaultType(CurrencyConvertMarketDataFaultType.INVALID_MARKET_DATA);
-			            myFault.setFaultMessage("Market File has already been converted");
-			            
-			            CurrencyConvertMarketDataFaultException myException = new CurrencyConvertMarketDataFaultException();
-			            myException.setFaultMessage(myFaultDoc);
-			            throw myException;
+				if(lineParts.length > 7) {
+					String bidPrice = lineParts[7];
+					if (!bidPrice.isEmpty()) {
+						Matcher matcher = pattern.matcher(bidPrice);
+						matcher.find();
+						if(!matcher.group(1).isEmpty()) {
+							in.close();
+				        	CurrencyConvertMarketDataFaultDocument myFaultDoc = CurrencyConvertMarketDataFaultDocument.Factory.newInstance();
+				        	CurrencyConvertMarketDataFault myFault = myFaultDoc.addNewCurrencyConvertMarketDataFault();
+				    		
+				            myFault.setFaultType(CurrencyConvertMarketDataFaultType.INVALID_MARKET_DATA);
+				            myFault.setFaultMessage("Market File has already been converted");
+				            
+				            CurrencyConvertMarketDataFaultException myException = new CurrencyConvertMarketDataFaultException();
+				            myException.setFaultMessage(myFaultDoc);
+				            throw myException;
+						}
+						double priceV = Double.parseDouble(matcher.group(2));
+						lineParts[7] = currency + String.format("%.2f", (priceV * conversions.get(currency)));
 					}
-					double priceV = Double.parseDouble(matcher.group(2));
-					lineParts[7] = currency + String.format("%.2f", (priceV * conversions.get(currency)));
 				}
-				
-				String askPrice = lineParts[9];
-				if (!askPrice.isEmpty()) {
-					Matcher matcher = pattern.matcher(askPrice);
-					matcher.find();
-					if(!matcher.group(1).isEmpty()) {
-						in.close();
-			        	CurrencyConvertMarketDataFaultDocument myFaultDoc = CurrencyConvertMarketDataFaultDocument.Factory.newInstance();
-			        	CurrencyConvertMarketDataFault myFault = myFaultDoc.addNewCurrencyConvertMarketDataFault();
-			    		
-			            myFault.setFaultType(CurrencyConvertMarketDataFaultType.INVALID_MARKET_DATA);
-			            myFault.setFaultMessage("Market File has already been converted");
-			            
-			            CurrencyConvertMarketDataFaultException myException = new CurrencyConvertMarketDataFaultException();
-			            myException.setFaultMessage(myFaultDoc);
-			            throw myException;
+		
+				if(lineParts.length > 9) {
+					String askPrice = lineParts[9];
+					if (!askPrice.isEmpty()) {
+						Matcher matcher = pattern.matcher(askPrice);
+						matcher.find();
+						if(!matcher.group(1).isEmpty()) {
+							in.close();
+				        	CurrencyConvertMarketDataFaultDocument myFaultDoc = CurrencyConvertMarketDataFaultDocument.Factory.newInstance();
+				        	CurrencyConvertMarketDataFault myFault = myFaultDoc.addNewCurrencyConvertMarketDataFault();
+				    		
+				            myFault.setFaultType(CurrencyConvertMarketDataFaultType.INVALID_MARKET_DATA);
+				            myFault.setFaultMessage("Market File has already been converted");
+				            
+				            CurrencyConvertMarketDataFaultException myException = new CurrencyConvertMarketDataFaultException();
+				            myException.setFaultMessage(myFaultDoc);
+				            throw myException;
+						}
+						double priceV = Double.parseDouble(matcher.group(2));
+						lineParts[9] = currency + String.format("%.2f", (priceV * conversions.get(currency)));
 					}
-					double priceV = Double.parseDouble(matcher.group(2));
-					lineParts[9] = currency + String.format("%.2f", (priceV * conversions.get(currency)));
 				}
 				
 				filteredEntries.add(join(lineParts, ",",0,lineParts.length));
@@ -399,8 +404,7 @@ public class CurrencyConvertMarketDataServiceSkeleton implements CurrencyConvert
 			CurrencyConvertMarketDataResponse res = resDoc.addNewCurrencyConvertMarketDataResponse();
 
 			res.setEventSetId(prefix);
-
-
+			
 			return resDoc;		
 
 
@@ -410,6 +414,7 @@ public class CurrencyConvertMarketDataServiceSkeleton implements CurrencyConvert
     		
             myFault.setFaultType(CurrencyConvertMarketDataFaultType.PROGRAM_ERROR);
             myFault.setFaultMessage("Error Parsing Market Data");
+            myFault.setFaultMessage(e.getMessage() + ":"+ e.getCause());
             
             CurrencyConvertMarketDataFaultException myException = new CurrencyConvertMarketDataFaultException();
             myException.setFaultMessage(myFaultDoc);

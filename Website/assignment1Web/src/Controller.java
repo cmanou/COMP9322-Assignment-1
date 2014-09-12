@@ -16,6 +16,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.axis2.databinding.types.URI;
 
+import au.edu.unsw.sltf.client.CurrencyConvertMarketDataFaultException;
+import au.edu.unsw.sltf.client.CurrencyConvertMarketDataServiceStub;
+import au.edu.unsw.sltf.client.CurrencyConvertMarketDataServiceStub.CurrencyConvertMarketData;
+import au.edu.unsw.sltf.client.CurrencyConvertMarketDataServiceStub.CurrencyConvertMarketDataResponse;
 import au.edu.unsw.sltf.client.SummaryMarketDataFaultException;
 import au.edu.unsw.sltf.client.SummaryMarketDataServiceStub;
 import au.edu.unsw.sltf.client.SummaryMarketDataServiceStub.*;
@@ -181,9 +185,7 @@ public class Controller extends HttpServlet {
 			    		+"Filesize: " +filesize + "<br><br>";
                 
                 request.setAttribute("summaryResponse", result);
-                
-                nextPage = "summary.jsp";
-			} catch (SummaryMarketDataFaultException e) {
+          	} catch (SummaryMarketDataFaultException e) {
                 String faultMsg = e.getFaultMessage().getFaultMessage();
                 String faultType = e.getFaultMessage().getFaultType().toString();
                 String totalResponse = "<h4>Error:</h4>"+ faultType+" - "+faultMsg;
@@ -191,6 +193,41 @@ public class Controller extends HttpServlet {
                 request.setAttribute("summaryResponse", totalResponse);
 			}
             nextPage = "summary.jsp";
+	    } else if (action.equals("requestCurrency")) {
+	        
+	        String eventSetId = request.getParameter("aEventSetId");
+	        String targetCurrency = request.getParameter("aTargetCurrency");
+	        
+            request.setAttribute("aEventSetId", eventSetId);
+            request.setAttribute("aTargetCurrency", targetCurrency);
+
+	       
+			try {
+
+    	        // Generate request.
+                CurrencyConvertMarketDataServiceStub myStub = new CurrencyConvertMarketDataServiceStub();
+                CurrencyConvertMarketData mySMD = new CurrencyConvertMarketData();
+
+                mySMD.setEventSetId(eventSetId);
+                mySMD.setTargetCurrency(targetCurrency);
+                
+                CurrencyConvertMarketDataResponse resp = myStub.currencyConvertMarketData(mySMD);
+              
+                String eventSetID = resp.getEventSetId();
+               
+                String result = "EventSetID: " + eventSetID;
+                
+                request.setAttribute("currencyResponse", result);
+                
+                nextPage = "currencyConvert.jsp";
+			} catch (CurrencyConvertMarketDataFaultException e) {
+                String faultMsg = e.getFaultMessage().getFaultMessage();
+                String faultType = e.getFaultMessage().getFaultType().toString();
+                String totalResponse = "<h4>Error:</h4>"+ faultType+" - "+faultMsg;
+                
+                request.setAttribute("currencyResponse", totalResponse);
+			}
+            nextPage = "currencyConvert.jsp";
 
 
 	    }
