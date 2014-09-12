@@ -16,12 +16,16 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.axis2.databinding.types.URI;
 
+import au.edu.unsw.sltf.client.SummaryMarketDataFaultException;
+import au.edu.unsw.sltf.client.SummaryMarketDataServiceStub;
+import au.edu.unsw.sltf.client.SummaryMarketDataServiceStub.*;
 import au.edu.unsw.sltf.services.DownloadFile;
 import au.edu.unsw.sltf.services.DownloadFileResponse;
 import au.edu.unsw.sltf.services.ImportDownloadFaultException;
 import au.edu.unsw.sltf.services.ImportDownloadServicesStub;
 import au.edu.unsw.sltf.services.ImportMarketData;
 import au.edu.unsw.sltf.services.ImportMarketDataResponse;
+
 
 /**
  * Servlet implementation class Controller
@@ -139,6 +143,56 @@ public class Controller extends HttpServlet {
                 
                 nextPage = "importDownload.jsp";
             }
+	    } else if (action.equals("requestSummary")) {
+	        
+	        String eventSetId = request.getParameter("aEventSetId");
+	       
+			try {
+
+    	        // Generate request.
+                SummaryMarketDataServiceStub myStub = new SummaryMarketDataServiceStub();
+                SummaryMarketData mySMD = new SummaryMarketData();
+
+                mySMD.setEventSetId(eventSetId);
+                
+                SummaryMarketDataResponse resp = myStub.summaryMarketData(mySMD);
+                
+                SimpleDateFormat myFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+                
+                String eventSetID = resp.getEventSetId();
+                String sec = resp.getSec();
+                
+                myFormat.setCalendar(resp.getStartDate()); 
+                String startDate = myFormat.format(resp.getStartDate().getTime());
+
+                myFormat.setCalendar(resp.getEndDate()); 
+                String endDate = myFormat.format(resp.getEndDate().getTime());
+                
+                String market = resp.getMarketType();
+                String currency = resp.getCurrencyCode();
+                String filesize = resp.getFileSize();
+                
+                String result = "EventSetID: " + eventSetID + "<br><br>"
+                		+"Sec: " +sec + "<br><br>"
+			    		+"StartDate: " +startDate + "<br><br>"
+			    		+"EndDate: " +endDate + "<br><br>"
+			    		+"Market: " +market + "<br><br>"
+			    		+"Currency: " +currency + "<br><br>"
+			    		+"Filesize: " +filesize + "<br><br>";
+                
+                request.setAttribute("summaryResponse", result);
+                
+                nextPage = "summary.jsp";
+			} catch (SummaryMarketDataFaultException e) {
+                String faultMsg = e.getFaultMessage().getFaultMessage();
+                String faultType = e.getFaultMessage().getFaultType().toString();
+                String totalResponse = "<h4>Error:</h4>"+ faultType+" - "+faultMsg;
+                
+                request.setAttribute("summaryResponse", totalResponse);
+			}
+            nextPage = "summary.jsp";
+
+
 	    }
 	    
 	    // Dispatch Control.
