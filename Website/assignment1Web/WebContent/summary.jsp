@@ -180,7 +180,7 @@
         		</tr>
         		<tr>
         			<td>eventSetId</td>
-        			<td><input type="text" name="aEventSetId" /></td>
+        			<td><input type="text" name="aEventSetId" value="${aEventSetId}"/></td>
         			<td rowspan="5">
         				${summaryResponse}
         			 </td>

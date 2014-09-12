@@ -121,8 +121,9 @@ public class Controller extends HttpServlet {
 	    } else if (action.equals("requestDownload")) {
 	        
 	        String eventSetId = request.getParameter("aEventSetId");
-	        
-	        try {
+            request.setAttribute("aEventSetId", eventSetId);
+            
+            try {
     	        // Generate request.
                 ImportDownloadServicesStub myStub = new ImportDownloadServicesStub();
     	        
