@@ -27,8 +27,8 @@
           <!-- put class="selected" in the li tag for the selected page - to highlight which page you're on -->
           <li><a href="index.jsp">Home</a></li>
           <li class="selected"><a href="importDownload.jsp">Import/Download</a></li>
-          <li><a href="page.html">Summary MarketData</a></li>
-          <li><a href="another_page.html">Currency Convert</a></li>
+          <li><a href="summary.jsp">Summary MarketData</a></li>
+          <li><a href="currencyConvert.jsp">Currency Convert</a></li>
         </ul>
       </div>
     </div>
