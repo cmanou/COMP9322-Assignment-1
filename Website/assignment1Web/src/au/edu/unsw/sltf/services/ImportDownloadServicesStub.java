@@ -126,7 +126,7 @@
      */
     public ImportDownloadServicesStub(org.apache.axis2.context.ConfigurationContext configurationContext) throws org.apache.axis2.AxisFault {
         
-                    this(configurationContext,"http://localhost:8080/axis2/services/ImportDownloadServices.ImportDownloadServicesHttpSoap12Endpoint/" );
+                    this(configurationContext,"http://cmanou.srvr:9000/axis2/services/ImportDownloadServices.ImportDownloadServicesHttpSoap12Endpoint/" );
                 
     }
 
@@ -135,7 +135,7 @@
      */
     public ImportDownloadServicesStub() throws org.apache.axis2.AxisFault {
         
-                    this("http://localhost:8080/axis2/services/ImportDownloadServices.ImportDownloadServicesHttpSoap12Endpoint/" );
+                    this("http://cmanou.srvr:9000/axis2/services/ImportDownloadServices.ImportDownloadServicesHttpSoap12Endpoint/" );
                 
     }
 

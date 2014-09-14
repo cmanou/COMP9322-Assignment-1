@@ -107,7 +107,7 @@
      */
     public SummaryMarketDataServiceStub(org.apache.axis2.context.ConfigurationContext configurationContext) throws org.apache.axis2.AxisFault {
         
-                    this(configurationContext,"http://localhost:8080/axis2/services/SummaryMarketDataService" );
+                    this(configurationContext,"http://cmanou.srvr:9000/axis2/services/SummaryMarketDataService" );
                 
     }
 
@@ -116,7 +116,7 @@
      */
     public SummaryMarketDataServiceStub() throws org.apache.axis2.AxisFault {
         
-                    this("http://localhost:8080/axis2/services/SummaryMarketDataService" );
+                    this("http://cmanou.srvr:9000/axis2/services/SummaryMarketDataService" );
                 
     }
 

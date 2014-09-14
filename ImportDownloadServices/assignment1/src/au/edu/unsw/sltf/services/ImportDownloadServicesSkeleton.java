@@ -35,7 +35,7 @@ import org.apache.axis2.databinding.types.URI.MalformedURIException;
         private final SimpleDateFormat myFormat = new SimpleDateFormat("dd-MMM-yyyy'T'HH:mm:ss.SSS");
         private final String MY_CORE_PATH = System.getProperty("java.io.tmpdir")+"/cjze477_ass1";
         private final String PRIVATE_PATH = "/private";
-        private final String WEB_ROOT = System.getenv("CATALINA_HOME")+"/webapps/ROOT";
+        private final String WEB_ROOT = "/srvr/cmanou/tomcat7-base/webapps/ROOT";
         private final String PUBLIC_PATH = "/cjze477_ass1/public";
         private final String SUFFIX = ".csv";
         /**
@@ -263,7 +263,7 @@ import org.apache.axis2.databinding.types.URI.MalformedURIException;
                 if(!publicFolder.mkdirs()){
                     ImportDownloadFault myFault = new ImportDownloadFault();
                     myFault.setFaultType(ImportDownloadFaultType.ProgramError);
-                    myFault.setFaultMessage("Public folder structure not created!");
+                    myFault.setFaultMessage("Public folder structure not created! Sorry");
                     
                     ImportDownloadFaultException myException = new ImportDownloadFaultException();
                     myException.setFaultMessage(myFault);
@@ -302,7 +302,7 @@ import org.apache.axis2.databinding.types.URI.MalformedURIException;
                
                newURI.setScheme("http");
                newURI.setHost(InetAddress.getLocalHost().getHostAddress());
-               newURI.setPort(50000);
+               newURI.setPort(9000);
                newURI.setPath(this.PUBLIC_PATH+"/"+eventSetId+this.SUFFIX);
                System.out.println(newURI.toString());
                response.setDataURL(newURI);
